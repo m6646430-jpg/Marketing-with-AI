@@ -32,6 +32,44 @@ python3 tools/make_clip.py --photo output/frames/me.jpg --say "..." --dry-run
 python3 tools/make_clip.py --photo output/frames/me.jpg --say "..." --open
 ```
 
+## One model per task
+
+Defined in `reelkit/models.py`, with the reasoning next to each choice.
+
+| Task | Model | Billing | Tokens? |
+|---|---|---|---|
+| Talking head | `kwaivgi/kling-v3.0-std` | $0.126/s | no |
+| Talking head (hero) | `kwaivgi/kling-v3.0-pro` | $0.168/s | no |
+| Silent b-roll | `alibaba/happyhorse-1.1` | $0.0988/s | no |
+| Transcribe / captions | `faster-whisper` **local** | free | **zero** |
+| Voiceover | ElevenLabs | per char | no |
+| Script (AI, stocks) | Nemotron Super | free | yes |
+| Script (jobs, resume) | Claude Sonnet 5 | $2/Mtok | yes |
+| Highlight scoring | Nemotron Super | free | yes |
+
+## On reducing tokens
+
+Measured, not assumed:
+
+- **Video is billed per second, not per token.** No prompt change makes a clip
+  cheaper or worse. The two are unrelated, so there is no quality/token
+  tradeoff to manage on video at all.
+- **A script call is ~400 tokens.** Ten a week is ~4k tokens: $0.00 free,
+  $0.008 on Sonnet. Video is ~$5.67/week — about 700× more. Trimming script
+  prompts optimises a rounding error.
+- **The biggest saving is architectural.** Transcribing locally with
+  faster-whisper takes a task from thousands of tokens to zero *and* produces
+  better output (word-level timestamps) than any LLM would. Prefer local
+  whenever a real local option exists.
+- **Where tokens genuinely bite** is scoring a 20-minute transcript (~4k tokens
+  a pass). `reelkit/tokens.py` handles that: `compact()` cuts ~31% versus JSON
+  by not repeating keys on every row, and `prefilter()` drops ~70% of segments
+  (though only ~20% of tokens — filler is short; its real value is signal, not
+  savings).
+
+Net: the lever that moves your bill is seconds of video, and cutting those
+costs quality. Everything else is already free.
+
 ## Model notes
 
 Established by testing on 2026-07-15, at a total cost of $2.29:

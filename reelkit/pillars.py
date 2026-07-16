@@ -11,8 +11,8 @@ DISCLAIMER = "Not investment advice. Educational content only."
 # they are 7 of every 10 posts. Trust pillars carry the face and the funnel,
 # so they get a paid model: the free one is accurate but flat, and a flat hook
 # loses the first two seconds. ~3 scripts/week on paid is under a cent.
-FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
-PAID_MODEL = "anthropic/claude-sonnet-5"
+from .models import SCRIPT_FREE as FREE_MODEL  # noqa: E402
+from .models import SCRIPT_PAID as PAID_MODEL  # noqa: E402
 
 PILLARS = {
     "ai": {
