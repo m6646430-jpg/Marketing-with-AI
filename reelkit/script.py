@@ -4,7 +4,10 @@ import json
 from .openrouter import chat
 from .pillars import GLOBAL_RULES, PILLARS, words_for_duration
 
-DEFAULT_MODEL = "anthropic/claude-sonnet-5"
+# Free tier. Tested 2026-07-15: this one returns clean JSON and a usable
+# script. Llama 3.3 70B, Qwen3 Next and Gemma 4 all 429'd on the free tier --
+# they may work when less busy; the client retries. Pass --model to override.
+DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
 
 SYSTEM = """You write short-form vertical video scripts for an Instagram/YouTube \
 reels page run by Mahesh, an AI developer and active stock investor who also runs \

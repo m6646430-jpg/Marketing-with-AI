@@ -2,6 +2,7 @@
 import base64
 import json
 import mimetypes
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -16,7 +17,12 @@ class OpenRouterError(RuntimeError):
     pass
 
 
-def _request(url, key, payload=None, method=None, timeout=120):
+def _request(url, key, payload=None, method=None, timeout=120, retries=4):
+    """Issue a request, retrying on upstream rate limits.
+
+    Free-tier models are throttled aggressively and return 429 with a
+    Retry-After. Without this, a batch of scripts fails halfway through.
+    """
     headers = {"Authorization": f"Bearer {key}"}
     data = None
     if payload is not None:
@@ -26,10 +32,33 @@ def _request(url, key, payload=None, method=None, timeout=120):
         url, data=data, headers=headers,
         method=method or ("POST" if payload is not None else "GET"),
     )
+
+    for attempt in range(retries + 1):
+        try:
+            return urllib.request.urlopen(req, timeout=timeout)
+        except urllib.error.HTTPError as e:
+            body = e.read().decode()
+            if e.code == 429 and attempt < retries:
+                wait = _retry_after(e, body, attempt)
+                print(f"  rate-limited, retrying in {wait}s "
+                      f"({attempt + 1}/{retries})", file=sys.stderr)
+                time.sleep(wait)
+                continue
+            raise OpenRouterError(f"HTTP {e.code} from {url}: {body[:1000]}") from None
+
+
+def _retry_after(err, body, attempt):
+    """Seconds to wait: prefer the server's advice, else exponential backoff."""
+    header = err.headers.get("Retry-After")
+    if header and header.isdigit():
+        return int(header)
     try:
-        return urllib.request.urlopen(req, timeout=timeout)
-    except urllib.error.HTTPError as e:
-        raise OpenRouterError(f"HTTP {e.code} from {url}: {e.read().decode()[:1000]}") from None
+        meta = json.loads(body).get("error", {}).get("metadata", {})
+        if meta.get("retry_after_seconds"):
+            return int(meta["retry_after_seconds"]) + 1
+    except (json.JSONDecodeError, AttributeError, TypeError, ValueError):
+        pass
+    return 2 ** attempt * 5
 
 
 def get_json(url, key=None, payload=None):
