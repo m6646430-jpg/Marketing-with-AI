@@ -4,10 +4,11 @@ import json
 from .openrouter import chat
 from .pillars import GLOBAL_RULES, PILLARS, words_for_duration
 
-# Free tier. Tested 2026-07-15: this one returns clean JSON and a usable
-# script. Llama 3.3 70B, Qwen3 Next and Gemma 4 all 429'd on the free tier --
-# they may work when less busy; the client retries. Pass --model to override.
-DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
+from .pillars import FREE_MODEL, PAID_MODEL  # noqa: F401  (re-exported)
+
+# Each pillar names its own model (see pillars.py). This is only the fallback
+# for callers that pass neither a pillar model nor an explicit override.
+DEFAULT_MODEL = FREE_MODEL
 
 SYSTEM = """You write short-form vertical video scripts for an Instagram/YouTube \
 reels page run by Mahesh, an AI developer and active stock investor who also runs \
@@ -27,11 +28,16 @@ Return ONLY valid JSON, no markdown fence, matching this shape:
 }"""
 
 
-def write_script(raw_content, pillar, duration=30, model=DEFAULT_MODEL, key=None):
-    """raw_content: your notes/article/data. Returns a dict (see SYSTEM)."""
+def write_script(raw_content, pillar, duration=30, model=None, key=None):
+    """raw_content: your notes/article/data. Returns a dict (see SYSTEM).
+
+    model=None uses the pillar's own model -- free for reach pillars, paid for
+    the ones carrying the face and the funnel.
+    """
     if pillar not in PILLARS:
         raise ValueError(f"unknown pillar {pillar!r}. Options: {list(PILLARS)}")
     p = PILLARS[pillar]
+    model = model or p.get("model", DEFAULT_MODEL)
     budget = words_for_duration(duration)
 
     prompt = f"""Pillar: {p['name']}
@@ -66,6 +72,7 @@ Write the script."""
 
     data["word_count"] = len(data.get("script", "").split())
     data["pillar"] = pillar
+    data["model"] = model
     data["over_budget"] = data["word_count"] > budget
     data["budget"] = budget
     return data

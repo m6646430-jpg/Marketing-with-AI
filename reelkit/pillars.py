@@ -7,9 +7,17 @@ Ratio target per 10 posts: 4 ai / 3 stocks / 2 jobs / 1 resume.
 
 DISCLAIMER = "Not investment advice. Educational content only."
 
+# Reach pillars run on the free tier -- volume matters more than polish, and
+# they are 7 of every 10 posts. Trust pillars carry the face and the funnel,
+# so they get a paid model: the free one is accurate but flat, and a flat hook
+# loses the first two seconds. ~3 scripts/week on paid is under a cent.
+FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
+PAID_MODEL = "anthropic/claude-sonnet-5"
+
 PILLARS = {
     "ai": {
         "name": "AI updates",
+        "model": FREE_MODEL,
         "faceless": True,
         "target_per_10": 4,
         "angle": (
@@ -21,6 +29,7 @@ PILLARS = {
     },
     "stocks": {
         "name": "Stock market",
+        "model": FREE_MODEL,
         "faceless": True,
         "target_per_10": 3,
         "angle": (
@@ -32,6 +41,7 @@ PILLARS = {
     },
     "jobs": {
         "name": "Jobs / career",
+        "model": PAID_MODEL,
         "faceless": False,
         "target_per_10": 2,
         "angle": (
@@ -42,6 +52,7 @@ PILLARS = {
     },
     "resume": {
         "name": "Resume / DriftAI",
+        "model": PAID_MODEL,
         "faceless": False,
         "target_per_10": 1,
         "angle": (

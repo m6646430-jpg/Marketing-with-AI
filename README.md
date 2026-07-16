@@ -54,9 +54,22 @@ report `pending` again afterwards.
 ## Strategy
 
 Encoded in `reelkit/pillars.py`. Per 10 posts: 4 AI, 3 stocks, 2 jobs,
-1 resume. Reach pillars (AI, stocks) run faceless and cost nothing to make;
-trust pillars (jobs, resume) use a real face and cost ~$1.89 a clip. So a
-typical week is ~$5.67 of generation, not $13.
+1 resume.
+
+| | Pillars | Face | Script model | Cost per clip |
+|---|---|---|---|---|
+| Reach | AI, stocks | no | free | $0 |
+| Trust | jobs, resume | yes | Sonnet | ~$1.89 |
+
+Reach pillars are 7 of 10 posts and cost nothing to make — volume matters more
+than polish. Trust pillars carry the face and the DriftAI funnel, so they get a
+paid script model: the free one is accurate but flat, and a flat hook loses the
+first two seconds. That's ~3 paid scripts a week, well under a cent.
+
+Each pillar names its own model, so `--pillar resume` just does the right
+thing. `--model` overrides when you want it.
+
+A typical week: ~$5.67 of video generation, ~$0.01 of scripts.
 
 Stock content is news and education only — never buy/sell calls, never price
 targets. The disclaimer is in the template so it can't be forgotten.

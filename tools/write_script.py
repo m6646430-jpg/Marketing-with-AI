@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from reelkit.config import OUTPUT_DIR  # noqa: E402
 from reelkit.pillars import PILLARS  # noqa: E402
-from reelkit.script import DEFAULT_MODEL, write_script  # noqa: E402
+from reelkit.script import write_script  # noqa: E402
 
 
 def main():
@@ -24,7 +24,8 @@ def main():
     ap.add_argument("--content", help="raw notes/article text")
     ap.add_argument("--file", help="read raw content from a file instead")
     ap.add_argument("--duration", type=int, default=30)
-    ap.add_argument("--model", default=DEFAULT_MODEL)
+    ap.add_argument("--model", default=None,
+                    help="override the pillar's model (see reelkit/pillars.py)")
     ap.add_argument("--save", action="store_true")
     args = ap.parse_args()
 
@@ -42,6 +43,8 @@ def main():
         print(f"  - {t}")
     flag = "  OVER BUDGET -- will get cut off" if out["over_budget"] else ""
     print(f"\n{out['word_count']} words / {out['budget']} budget ({args.duration}s){flag}")
+    paid = not out["model"].endswith(":free")
+    print(f"model  {out['model']}  ({'paid' if paid else 'free'})")
 
     if args.save:
         d = OUTPUT_DIR / "scripts"
