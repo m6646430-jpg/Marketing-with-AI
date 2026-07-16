@@ -49,8 +49,21 @@ python3 tools/make_reel.py --pillar stocks --frame output/frames/trading_desk.jp
 ```
 
 `make_reel.py` is the everyday command — one reel per invocation. Only the clip
-step costs money ($1.89); everything else is free. Always `--dry-run` first: it
-writes the script and prints the total cost before anything is charged.
+step costs money ($1.89); everything else is free.
+
+**For real posts, approve the script first.** `--content` writes a *fresh*
+script on every run (the free model has no seed), so a `--dry-run` preview
+won't match the real run. Instead iterate with `write_script.py --save`, then
+pass the saved file — the preview then matches the final exactly:
+
+```bash
+python3 tools/write_script.py --pillar stocks --content "..." --save   # free, iterate
+python3 tools/make_reel.py --pillar stocks --frame output/frames/trading_desk.jpg \
+    --script-file output/scripts/stocks_001.json --open
+```
+
+Use `--content` only for quick throwaway tests, or `--say "exact line"` when you
+already have the words.
 
 Captions are not optional. Most reels are watched muted — they're the
 difference between watched and scrolled.

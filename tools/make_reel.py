@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """One finished reel, end to end: script -> clip -> transcribe -> captions.
 
-    # always dry-run first: shows the script, the plan, and the total cost
+    # RECOMMENDED for real posts -- approve the exact script, then generate it:
+    python3 tools/write_script.py --pillar stocks --content "..." --save   # iterate free
     python3 tools/make_reel.py --pillar stocks --frame output/frames/trading_desk.jpg \
-        --content "what an index fund is and why beginners start there" --dry-run
+        --script-file output/scripts/stocks_001.json --open
 
-    # then for real
+    # quick/throwaway -- writes a FRESH script each run, so the dry-run preview
+    # will NOT match what the real run generates (the free model has no seed):
     python3 tools/make_reel.py --pillar stocks --frame output/frames/trading_desk.jpg \
-        --content "..." --open
+        --content "what an index fund is" --dry-run
 
 Only the clip step costs money ($1.89 for 15s). Script, transcription and
 captions are free. The --frame is a styled first frame from style_photo.py --
@@ -15,6 +17,7 @@ rotate different location frames across reels for variety with a consistent
 face.
 """
 import argparse
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -42,8 +45,11 @@ def main():
     ap.add_argument("--pillar", required=True, choices=list(PILLARS))
     ap.add_argument("--frame", required=True, help="styled first frame (style_photo.py)")
     g = ap.add_mutually_exclusive_group(required=True)
-    g.add_argument("--content", help="raw notes -> script is written for you")
-    g.add_argument("--say", help="an exact spoken line, skip script writing")
+    g.add_argument("--content", help="raw notes -> a fresh script is written (NOT reproducible: "
+                                     "the dry-run script won't match the real run)")
+    g.add_argument("--say", help="an exact spoken line, verbatim")
+    g.add_argument("--script-file", help="a saved script JSON (from write_script.py --save). "
+                                         "Preview matches final -- use this for real posts.")
     ap.add_argument("--duration", type=int, default=15)
     ap.add_argument("--subject", default=SUBJECT)
     ap.add_argument("--model", help="override the video model")
@@ -73,6 +79,19 @@ def main():
     if args.say:
         spoken = args.say
         print(f"using provided line ({len(spoken.split())} words)", file=sys.stderr)
+    elif args.script_file:
+        sf = Path(args.script_file)
+        if not sf.is_file():
+            sys.exit(f"script file not found: {sf}")
+        saved = json.loads(sf.read_text())
+        spoken = saved.get("script")
+        if not spoken:
+            sys.exit(f"{sf} has no 'script' field -- is it from write_script.py --save?")
+        print(f"using saved script {sf.name} ({len(spoken.split())} words) -- "
+              f"preview matches final", file=sys.stderr)
+        if saved.get("hook"):
+            print(f"\nHOOK  {saved['hook']}")
+        print(f"\n{spoken}")
     else:
         step(1, 4, f"writing {args.pillar} script (free)...")
         out = write_script(args.content, args.pillar, duration=args.duration)
@@ -81,6 +100,9 @@ def main():
         print(f"\n{spoken}")
         print(f"\n{out['word_count']}/{out['budget']} words"
               + ("  OVER BUDGET" if out["over_budget"] else ""), file=sys.stderr)
+        print("NOTE: --content writes a fresh script each run, so this won't be "
+              "reproduced on the real run. For real posts, save with write_script.py "
+              "and pass --script-file.", file=sys.stderr)
 
     prompt = to_video_prompt(spoken, args.subject, "this scene")
 
