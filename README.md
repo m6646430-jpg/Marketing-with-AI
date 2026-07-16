@@ -40,19 +40,35 @@ python3 tools/transcribe.py --src clip.mp4 --save
 
 # burn word-by-word captions (free, local)
 python3 tools/add_captions.py --src clip.mp4 --open
+
+# ONE finished reel, all steps chained (script -> clip -> transcribe -> captions)
+python3 tools/make_reel.py --pillar stocks --frame output/frames/trading_desk.jpg \
+    --content "what an index fund is" --dry-run    # shows script + $1.89 first
+python3 tools/make_reel.py --pillar stocks --frame output/frames/trading_desk.jpg \
+    --content "what an index fund is" --open
 ```
+
+`make_reel.py` is the everyday command — one reel per invocation. Only the clip
+step costs money ($1.89); everything else is free. Always `--dry-run` first: it
+writes the script and prints the total cost before anything is charged.
 
 Captions are not optional. Most reels are watched muted — they're the
 difference between watched and scrolled.
 
-**Visual consistency.** The first frame *is* the look of a reel — its
-background, framing and outfit come from that image. Random selfies make every
-post look like a different account. So make one canonical brand frame with
-`style_photo.py` (same face, clean styled background) and reuse it as the first
-frame for every face reel. It edits the wrapper only — the face is locked in
-every prompt, because a reel showing a face that isn't yours is the same
-authenticity problem as an avatar. At ~$0.14 an edit it's a once-off, not a
-per-post step.
+**Visual consistency, with location variety.** The first frame *is* the look of
+a reel — its background and framing come from that image. What must stay
+constant for a recognisable page is your **face, caption style and format** —
+not the background. So vary the *place*, keep the *face*.
+
+Build a small library of location frames once with `style_photo.py --location`
+(studio, office, cafe, home_desk, trading_desk, city, bookshelf, rooftop), then
+rotate them across reels for free. Each frame is a one-time ~$0.14 on the Pro
+model; five locations is ~$0.70 and then unlimited variety at no further cost.
+
+The face is locked in every styling prompt — a reel showing a face that isn't
+yours is the same authenticity problem as an avatar. **Use the Pro model for
+any real frame:** the cheap one drifts the face (tested — it returned a slimmer
+stranger).
 
 ## One model per task
 

@@ -50,16 +50,65 @@ BRAND_FRAMES = {
     ),
 }
 
+# A library of locations to rotate across reels. Same face every time (the
+# identity lock holds), different place -- that's what keeps a page from
+# looking monotonous WITHOUT looking like a different account. Build each once
+# (~$0.14 on the Pro model), then reuse the frame free forever.
+LOCATIONS = {
+    "studio": (
+        "Place the person against a clean, softly-lit neutral studio background "
+        "in a subtle dark tone."
+    ),
+    "office": (
+        "Place the person in a bright, blurred modern office with glass and "
+        "greenery, warm daylight."
+    ),
+    "cafe": (
+        "Place the person in a cozy blurred cafe -- warm lights, wood tones, "
+        "soft bokeh behind."
+    ),
+    "home_desk": (
+        "Place the person at a tidy home desk setup with a soft lamp, a plant "
+        "and a blurred bookshelf behind."
+    ),
+    "trading_desk": (
+        "Place the person at a trading desk with softly blurred market charts "
+        "and screens glowing behind, dark and subtle."
+    ),
+    "city": (
+        "Place the person on a blurred modern city street at golden hour, "
+        "soft urban bokeh behind."
+    ),
+    "bookshelf": (
+        "Place the person in front of a warm, blurred bookshelf, soft indoor "
+        "lighting -- a thoughtful, podcast-style backdrop."
+    ),
+    "rooftop": (
+        "Place the person on a blurred rooftop terrace at dusk with a soft "
+        "city skyline behind."
+    ),
+}
+
+# Common framing appended to every location so the crop stays reel-ready.
+FRAMING = " Head-and-shoulders, centered, vertical 9:16, background well out of focus."
+
 OUTFIT_HINT = (
     " Keep the clothing simple and consistent: a plain, solid-colour top that "
     "reads as neat and professional."
 )
 
 
-def build_prompt(pillar="brand", extra=None, restyle_outfit=False):
-    base = BRAND_FRAMES.get(pillar)
-    if not base:
-        raise ValueError(f"unknown pillar {pillar!r}. Options: {list(BRAND_FRAMES)}")
+def build_prompt(pillar="brand", location=None, extra=None, restyle_outfit=False):
+    """Build an edit prompt. `location` (if given) overrides the pillar default,
+    so you can put the same pillar in many different places."""
+    if location:
+        if location not in LOCATIONS:
+            raise ValueError(f"unknown location {location!r}. Options: {list(LOCATIONS)}")
+        base = LOCATIONS[location] + FRAMING
+    else:
+        base = BRAND_FRAMES.get(pillar)
+        if not base:
+            raise ValueError(f"unknown pillar {pillar!r}. Options: {list(BRAND_FRAMES)}")
     prompt = IDENTITY_LOCK + base
     if restyle_outfit:
         prompt += OUTFIT_HINT

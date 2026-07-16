@@ -23,13 +23,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from reelkit.config import OUTPUT_DIR  # noqa: E402
 from reelkit.models import STYLE_PHOTO, STYLE_PHOTO_CHEAP  # noqa: E402
 from reelkit.openrouter import OpenRouterError, edit_image  # noqa: E402
-from reelkit.style import BRAND_FRAMES, build_prompt  # noqa: E402
+from reelkit.style import BRAND_FRAMES, LOCATIONS, build_prompt  # noqa: E402
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", required=True, help="a real selfie, front-facing")
     ap.add_argument("--pillar", default="brand", choices=list(BRAND_FRAMES))
+    ap.add_argument("--location", choices=list(LOCATIONS),
+                    help="override the pillar background with a specific place")
     ap.add_argument("--extra", help="extra styling notes (surroundings only)")
     ap.add_argument("--restyle-outfit", action="store_true",
                     help="also normalise the top to a plain professional colour")
@@ -49,12 +51,12 @@ def main():
     if args.cheap:
         print("WARNING: --cheap drifts the face. Use only for background tests, "
               "never a frame that reaches a reel.\n", file=sys.stderr)
-    prompt = build_prompt(args.pillar, extra=args.extra,
+    prompt = build_prompt(args.pillar, location=args.location, extra=args.extra,
                           restyle_outfit=args.restyle_outfit)
 
     print(f"model    {model}")
     print(f"source   {src.name}")
-    print(f"pillar   {args.pillar}")
+    print(f"place    {args.location or args.pillar + ' (pillar default)'}")
     print(f"face     locked (surroundings only)")
     print(f"\nprompt   {prompt}\n")
 
@@ -62,7 +64,8 @@ def main():
         print("(dry run -- nothing sent, nothing charged)")
         return
 
-    out = Path(args.out) if args.out else OUTPUT_DIR / "frames" / f"{args.pillar}.jpg"
+    stem = args.location or args.pillar
+    out = Path(args.out) if args.out else OUTPUT_DIR / "frames" / f"{stem}.jpg"
     out.parent.mkdir(parents=True, exist_ok=True)
 
     try:
