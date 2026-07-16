@@ -31,6 +31,10 @@ python3 tools/crop_photo.py --src selfie.jpg --out output/frames/me.jpg --open
 python3 tools/make_clip.py --photo output/frames/me.jpg --say "..." --dry-run
 python3 tools/make_clip.py --photo output/frames/me.jpg --say "..." --open
 
+# selfie -> on-brand first frame, same face, styled background (~$0.14, do once)
+python3 tools/style_photo.py --src selfie.jpg --pillar brand --dry-run
+python3 tools/style_photo.py --src selfie.jpg --pillar brand --open
+
 # transcribe locally with word timings (free, offline, zero tokens)
 python3 tools/transcribe.py --src clip.mp4 --save
 
@@ -40,6 +44,15 @@ python3 tools/add_captions.py --src clip.mp4 --open
 
 Captions are not optional. Most reels are watched muted — they're the
 difference between watched and scrolled.
+
+**Visual consistency.** The first frame *is* the look of a reel — its
+background, framing and outfit come from that image. Random selfies make every
+post look like a different account. So make one canonical brand frame with
+`style_photo.py` (same face, clean styled background) and reuse it as the first
+frame for every face reel. It edits the wrapper only — the face is locked in
+every prompt, because a reel showing a face that isn't yours is the same
+authenticity problem as an avatar. At ~$0.14 an edit it's a once-off, not a
+per-post step.
 
 ## One model per task
 

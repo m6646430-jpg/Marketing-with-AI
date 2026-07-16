@@ -64,6 +64,26 @@ TTS_OPENROUTER = "openai/gpt-audio-mini"
 # an ElevenLabs account. Cheap; voice quality is the tradeoff.
 
 
+# --- image edit (styling the first frame) ----------------------------------
+# Change the wrapper (background, framing, outfit), never the face. Google's
+# Gemini image models ("Nano Banana") are the strongest at keeping the subject
+# actually recognisable through an edit -- which is the whole point when the
+# subject is a real founder.
+#
+# Cost note (measured 2026-07-15, correcting an earlier under-estimate): the
+# per-image price is NOT the per-token figure in the model list. One Pro edit
+# actually cost $0.14. So this is a rare, deliberate step -- make ONE brand
+# frame and reuse it forever -- not something to run per post.
+
+STYLE_PHOTO = "google/gemini-3-pro-image"
+# Best identity preservation, ~$0.14/edit. Use once for the canonical brand
+# frame, then reuse that frame as the first frame for every face reel.
+
+STYLE_PHOTO_CHEAP = "google/gemini-2.5-flash-image"
+# Cheaper per the list price; run --dry-run then check the actual charge in
+# the output before assuming. For occasional per-pillar background swaps.
+
+
 # --- text ------------------------------------------------------------------
 # The only layer where tokens are actually spent. See pillars.py for which
 # pillar gets which.
@@ -83,6 +103,8 @@ TASKS = {
     "broll":          {"model": VIDEO_BROLL,          "billing": "per_second", "tokens": False},
     "transcribe":     {"model": TRANSCRIBE_LOCAL,     "billing": "local",      "tokens": False},
     "tts":            {"model": TTS_BEST,             "billing": "per_char",   "tokens": False},
+    "style_photo":    {"model": STYLE_PHOTO,          "billing": "per_image",  "tokens": False},
+    "style_photo_cheap": {"model": STYLE_PHOTO_CHEAP, "billing": "per_image",  "tokens": False},
     "script_reach":   {"model": SCRIPT_FREE,          "billing": "per_token",  "tokens": True},
     "script_trust":   {"model": SCRIPT_PAID,          "billing": "per_token",  "tokens": True},
     "score":          {"model": SCORE_HIGHLIGHTS,     "billing": "per_token",  "tokens": True},

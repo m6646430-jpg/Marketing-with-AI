@@ -167,6 +167,30 @@ def generate_video(model, prompt, photo=None, duration=15, resolution="720p",
             raise OpenRouterError(f"timed out after {timeout}s (job {job.get('id')})")
 
 
+def edit_image(model, prompt, source, key=None, timeout=180):
+    """Edit `source` (a local image path) per `prompt`. Returns (bytes, usage).
+
+    Uses the /images endpoint with input_references, so the source guides the
+    edit rather than being described in text. The model keeps the subject and
+    changes what the prompt asks for.
+    """
+    key = key or load_env()
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "input_references": [{
+            "type": "image_url",
+            "image_url": {"url": photo_to_data_uri(source)},
+        }],
+    }
+    d = get_json(f"{BASE}/images", key, payload)
+
+    items = d.get("data") or []
+    if not items or not items[0].get("b64_json"):
+        raise OpenRouterError(f"no image returned: {json.dumps(d)[:500]}")
+    return base64.b64decode(items[0]["b64_json"]), d.get("usage", {})
+
+
 def chat(model, messages, key=None, temperature=0.7):
     d = get_json(f"{BASE}/chat/completions", key, {
         "model": model,
