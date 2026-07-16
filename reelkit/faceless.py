@@ -28,8 +28,11 @@ Return ONLY valid JSON, no markdown fence:
   "cta": "closing call to action",
   "scenes": [
     {"narration": "one or two spoken sentences",
-     "image_prompt": "a vivid, concrete visual to show while this is narrated -- \
-cinematic, vertical 9:16, no text, no watermark, no real logos"}
+     "image_prompt": "a vivid, concrete visual to show while this is narrated. \
+Describe it cinematically: subject, composition, lighting, mood, depth. Prefer \
+real-world scenes, objects, and metaphors over UI/screens/charts -- AI image \
+models render garbled fake text on those. Absolutely NO text, letters, numbers, \
+words, logos, or watermarks anywhere in the image. Vertical 9:16."}
   ]
 }"""
 

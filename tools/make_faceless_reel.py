@@ -42,7 +42,9 @@ def generate_image(prompt, out, model=IMAGE_MODEL):
     import base64
     d = get_json(f"{BASE}/images", None, {
         "model": model,
-        "prompt": prompt + " Vertical 9:16, cinematic, no text, no watermark.",
+        "prompt": prompt + (" Cinematic, professional colour grade, shallow depth "
+                            "of field, vertical 9:16. No text, letters, numbers, "
+                            "logos or watermarks anywhere."),
     })
     items = d.get("data") or []
     if not items or not items[0].get("b64_json"):

@@ -78,16 +78,31 @@ Write the script."""
     return data
 
 
-def to_video_prompt(script_line, subject_desc, setting="a bright modern indoor space"):
-    """Wrap a spoken line as a scene prompt with quoted speech.
+# Cinematic defaults. Principle-level (shot, light, camera, delivery), not any
+# one platform's syntax. Deliberately tight: a few strong directives read
+# better than a wall of adjectives, which over-constrains the model and can
+# make output worse. Tune these knobs rather than piling on more.
+SHOT = "medium close-up, head and shoulders, subject centered"
+LIGHT = "soft key light with gentle rim separation, flattering and clean"
+CAMERA = "locked-off camera with a very subtle slow push-in"
+GRADE = "natural cinematic colour, crisp, not oversaturated"
 
-    Kling and Veo both produce dialogue when speech is quoted inside a scene
-    description. Passing a bare script makes them generate a scene *about* it.
+
+def to_video_prompt(script_line, subject_desc, setting="the scene",
+                    energy="warm, confident, conversational"):
+    """Wrap a spoken line as a cinematic scene prompt with quoted speech.
+
+    Kling and Veo produce dialogue when speech is quoted inside the scene
+    description -- a bare script makes them generate a scene *about* it, so the
+    quotes are load-bearing and must stay. The cinematic direction (shot, light,
+    camera, delivery) lifts output quality at no extra cost; the first frame
+    already carries the background, so `setting` is a light cue, not the anchor.
     """
     return (
-        f"{subject_desc} stands in {setting}, looking directly into the camera "
-        f"and speaking straight to it with a warm, confident smile and natural "
-        f'head movement, saying: "{script_line}" Clear Indian English accent, '
-        f"friendly energetic delivery, static camera, vertical portrait framing, "
-        f"soft indoor lighting, shallow depth of field."
+        f"{subject_desc}, in {setting}. {SHOT}. "
+        f"The subject looks directly into the lens and speaks straight to camera "
+        f"with {energy} delivery, natural head movement and genuine "
+        f'micro-expressions, saying: "{script_line}" '
+        f"Lips accurately synced to the spoken words. Clear Indian English accent. "
+        f"{LIGHT}. {CAMERA}. {GRADE}. Vertical 9:16 framing, shallow depth of field."
     )
