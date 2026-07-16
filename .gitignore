@@ -1,0 +1,21 @@
+# secrets -- never commit
+.env
+.env.local
+*.key
+
+# generated media
+output/
+*.mp4
+*.mov
+*.wav
+*.mp3
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# macOS
+.DS_Store
