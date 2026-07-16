@@ -30,7 +30,16 @@ python3 tools/crop_photo.py --src selfie.jpg --out output/frames/me.jpg --open
 # first frame + line -> talking-head clip (COSTS MONEY — dry-run first)
 python3 tools/make_clip.py --photo output/frames/me.jpg --say "..." --dry-run
 python3 tools/make_clip.py --photo output/frames/me.jpg --say "..." --open
+
+# transcribe locally with word timings (free, offline, zero tokens)
+python3 tools/transcribe.py --src clip.mp4 --save
+
+# burn word-by-word captions (free, local)
+python3 tools/add_captions.py --src clip.mp4 --open
 ```
+
+Captions are not optional. Most reels are watched muted — they're the
+difference between watched and scrolled.
 
 ## One model per task
 
@@ -83,6 +92,12 @@ Established by testing on 2026-07-15, at a total cost of $2.29:
 Google's `personGeneration` policy refuses clear photos of identifiable real
 people. A side profile passed; a front-facing headshot was filtered. Kling has
 no such restriction. Default is Kling for that reason, not quality.
+
+**Kling recites a script verbatim** if you put the spoken line in quotes inside
+the scene description — that's what `to_video_prompt()` does. Confirmed by
+transcribing a generated clip back with whisper and getting the input script
+returned word for word. Passing a bare script as the prompt does *not* work:
+the model generates a scene *about* the text instead of someone saying it.
 
 Two OpenRouter quirks the client already handles: video download URLs are API
 endpoints and need the `Authorization` header, and the job record is eventually
