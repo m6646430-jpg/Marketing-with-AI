@@ -86,6 +86,33 @@ the content if it runs long.
 Route face pillars (jobs, resume) through `make_reel.py`, reach pillars (AI,
 stocks) through `make_faceless_reel.py`. That mix is ~$4/week instead of ~$13.
 
+## Record-and-clip (turn one long video into many reels)
+
+The alternative to generating clips: record ~20 minutes once, harvest several
+reels. Free end to end — transcription, highlight scoring (free-tier LLM),
+cutting, face-crop, captions and 1080p upscale all run locally or free.
+
+```bash
+python3 tools/clip_video.py --src my_recording.mp4 --clips 5 --dry-run   # see the picks
+python3 tools/clip_video.py --src my_recording.mp4 --clips 5 --upscale --open
+```
+
+What it does: whisper transcribes → the LLM scores self-contained 15-45s
+highlights (this is what `tokens.py` was built for) → `FaceDetectorYN` finds
+where your face sits and crops a stable 9:16 window that keeps it framed →
+captions → optional ffmpeg upscale to 1080p.
+
+Upscaling is ffmpeg (lanczos + unsharp), zero extra dependencies. The neural
+option (Real-ESRGAN + GFPGAN) from the reference repo gives better faces but
+needs PyTorch + ~400MB of weights and is fragile on Python 3.9 / Apple Silicon;
+`reelkit/upscale.py` leaves a `neural_upscale` seam to plug it in if you ever
+set that up. ffmpeg is the honest default.
+
+**Generate vs record:** face reels via `make_reel.py` cost $1.89 each; a
+recording clipped here costs ~nothing and is unmistakably you. If you'll record
+weekly, this wins on cost and authenticity. If not, generation wins on
+convenience. Both paths are built.
+
 ## Publishing (you trigger it, never automatic)
 
 `tools/publish.py` posts an approved reel via the Instagram Graph API. It is
