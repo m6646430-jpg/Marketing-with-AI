@@ -80,8 +80,11 @@ STYLE_PHOTO = "google/gemini-3-pro-image"
 # frame, then reuse that frame as the first frame for every face reel.
 
 STYLE_PHOTO_CHEAP = "google/gemini-2.5-flash-image"
-# Cheaper per the list price; run --dry-run then check the actual charge in
-# the output before assuming. For occasional per-pillar background swaps.
+# ~$0.04/edit. BUT tested 2026-07-15: it drifts the face -- a stocks frame
+# came back slimmer, reading as a different person. Fine for throwaway
+# background tests, NOT for any frame whose face reaches a reel. Identity
+# preservation is the one thing that matters here, and the cheap model fails
+# it. Use STYLE_PHOTO (Pro) for anything real.
 
 
 # --- text ------------------------------------------------------------------

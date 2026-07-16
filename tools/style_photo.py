@@ -34,7 +34,8 @@ def main():
     ap.add_argument("--restyle-outfit", action="store_true",
                     help="also normalise the top to a plain professional colour")
     ap.add_argument("--cheap", action="store_true",
-                    help="use the ~10x cheaper model (fine once brand frame exists)")
+                    help="~$0.04 model, but it DRIFTS THE FACE -- background tests only, "
+                         "never a frame that reaches a reel")
     ap.add_argument("--out", help="default: output/frames/<pillar>.jpg")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--open", action="store_true")
@@ -45,6 +46,9 @@ def main():
         sys.exit(f"not found: {src}")
 
     model = STYLE_PHOTO_CHEAP if args.cheap else STYLE_PHOTO
+    if args.cheap:
+        print("WARNING: --cheap drifts the face. Use only for background tests, "
+              "never a frame that reaches a reel.\n", file=sys.stderr)
     prompt = build_prompt(args.pillar, extra=args.extra,
                           restyle_outfit=args.restyle_outfit)
 
