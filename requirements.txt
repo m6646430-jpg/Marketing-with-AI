@@ -1,3 +1,4 @@
 Pillow>=10.0
 faster-whisper>=1.0     # local transcription with word-level timestamps
 imageio-ffmpeg>=0.4     # bundles a static ffmpeg -- no brew needed
+edge-tts>=7.0           # free neural TTS for faceless reels (Indian English voices)

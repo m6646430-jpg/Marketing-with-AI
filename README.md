@@ -65,6 +65,40 @@ python3 tools/make_reel.py --pillar stocks --frame output/frames/trading_desk.jp
 Use `--content` only for quick throwaway tests, or `--say "exact line"` when you
 already have the words.
 
+## Faceless reels (the cheap path for reach pillars)
+
+AI and stocks are 7 of every 10 posts and don't need your face. A faceless reel
+is AI images + Ken Burns zoom + a free neural voiceover + captions — no Kling
+clip, so **~$0.16 instead of $1.89** (just the per-scene images; voice and
+captions are free).
+
+```bash
+python3 tools/make_faceless_reel.py --pillar ai --content "..." --dry-run
+python3 tools/make_faceless_reel.py --pillar stocks --content "..." --open
+```
+
+Voice is `edge-tts` (en-IN-PrabhatNeural, male Indian English), free, with
+macOS `say` as a zero-dependency fallback. Two known rough edges: AI image
+models render **garbled fake text**, so keep image prompts away from screens
+and UI; and narration can **overrun the target length** — trim `--scenes` or
+the content if it runs long.
+
+Route face pillars (jobs, resume) through `make_reel.py`, reach pillars (AI,
+stocks) through `make_faceless_reel.py`. That mix is ~$4/week instead of ~$13.
+
+## Publishing (you trigger it, never automatic)
+
+`tools/publish.py` posts an approved reel via the Instagram Graph API. It is
+**not** unattended — it needs `--confirm` *and* a typed "yes", and you run it.
+That human gate is deliberate: AI-paraphrased market/news content must not post
+itself under your name.
+
+One-time setup required before it works (see `reelkit/instagram.py`): an
+Instagram Business/Creator account, a Meta app with `instagram_content_publish`,
+a long-lived token + IG user id in `.env`, and public hosting for the mp4 (the
+API pulls from a URL, not a local file). Until that's set up, only `--dry-run`
+runs.
+
 Captions are not optional. Most reels are watched muted — they're the
 difference between watched and scrolled.
 
