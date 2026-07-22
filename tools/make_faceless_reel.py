@@ -25,7 +25,9 @@ from reelkit.faceless import (concat_audio, concat_clips, ken_burns_scene,  # no
 from reelkit.models import STYLE_PHOTO_CHEAP  # noqa: E402
 from reelkit.openrouter import OpenRouterError, edit_image  # noqa: E402
 from reelkit.pillars import PILLARS  # noqa: E402
-from reelkit.tts import VOICE, duration_of, synthesize  # noqa: E402
+from reelkit.tts import VOICE, duration_of  # noqa: E402
+from reelkit.voice import synthesize as voice_synth  # noqa: E402
+from reelkit.voice import is_running as voicebox_running  # noqa: E402
 from reelkit.transcribe import DEFAULT_SIZE, all_words, ffmpeg_path, transcribe  # noqa: E402
 
 # Faceless images don't carry a real face, so the cheap image model is fine
@@ -61,7 +63,9 @@ def main():
     grp.add_argument("--script-file", help="a saved scene-script JSON (reproducible)")
     ap.add_argument("--scenes", type=int, default=4)
     ap.add_argument("--duration", type=int, default=30)
-    ap.add_argument("--voice", default=VOICE)
+    ap.add_argument("--voice", default=VOICE, help="edge-tts voice (fallback)")
+    ap.add_argument("--profile", default=None,
+                    help="Voicebox voice profile (your cloned voice) if the app is running")
     ap.add_argument("--name")
     ap.add_argument("--margin-v", type=int, default=340)
     ap.add_argument("--max-cost", type=float, default=1.00)
@@ -110,7 +114,11 @@ def main():
         spent += c or 0
         print(f"[scene {i+1}] voice...", file=sys.stderr)
         aud = work / f"scene{i}.mp3"
-        synthesize(s["narration"], aud, voice=args.voice)
+        # Voicebox (cloned voice) if the app is up, else edge-tts. English only
+        # for Voicebox -- it has no Telugu.
+        _, backend = voice_synth(s["narration"], aud, profile=args.profile, language="en")
+        if i == 0:
+            print(f"    voice backend: {backend}", file=sys.stderr)
         dur = duration_of(aud) + 0.25  # small tail so the zoom doesn't snap
         clip = work / f"scene{i}.mp4"
         ken_burns_scene(img, clip, dur)
