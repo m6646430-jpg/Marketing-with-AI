@@ -76,24 +76,27 @@ def synthesize_voicebox(text, out_path, profile=None, language="en",
                             f"(supported: {sorted(SUPPORTED)})")
 
     # /speak is the simple REST wrapper (accepts a profile *name*); prefer it.
+    # It returns immediately with status "generating"; poll /history/{id} for
+    # completion (the /generate/{id}/status route is an SSE stream, not JSON).
     resp = json.load(_req("/speak", {
         "text": text, "profile": profile, "engine": engine,
     }))
     gen_id = resp.get("id")
-    audio_path = resp.get("audio_path")
+    if not gen_id:
+        raise VoiceboxError(f"no generation id from /speak: {resp}")
 
-    # If generation is async, poll status until the audio is ready.
     started = time.time()
-    while not audio_path and gen_id:
-        time.sleep(2)
-        st = json.load(_req(f"/generate/{gen_id}/status"))
-        if st.get("status") in ("done", "completed", "ready"):
-            audio_path = st.get("audio_path") or True
+    while True:
+        st = json.load(_req(f"/history/{gen_id}"))
+        status = st.get("status")
+        if status == "completed" and st.get("audio_path"):
             break
-        if st.get("status") in ("failed", "error", "cancelled"):
-            raise VoiceboxError(f"Voicebox generation {st.get('status')}: {st}")
+        if status in ("failed", "error", "cancelled"):
+            raise VoiceboxError(f"Voicebox generation {status}: {st.get('error')}")
         if time.time() - started > timeout:
-            raise VoiceboxError("Voicebox generation timed out")
+            raise VoiceboxError(f"Voicebox generation timed out (first run downloads "
+                                f"the TTS model, which can be slow)")
+        time.sleep(2)
 
     # Fetch the rendered audio bytes and write them out.
     audio = _req(f"/audio/{gen_id}", timeout=120).read()
