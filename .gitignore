@@ -19,3 +19,7 @@ venv/
 
 # macOS
 .DS_Store
+
+# background library media (large; keep local)
+backgrounds/*.mp4
+backgrounds/*.png
