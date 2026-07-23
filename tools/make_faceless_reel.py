@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from reelkit.captions import build_ass  # noqa: E402
+from reelkit.captions import align_script, build_ass  # noqa: E402
 from reelkit.config import OUTPUT_DIR  # noqa: E402
 from reelkit.faceless import (concat_audio, concat_clips, ken_burns_scene,  # noqa: E402
                               mux, write_scene_script)
@@ -138,6 +138,10 @@ def main():
     capd = OUTPUT_DIR / "captioned"; capd.mkdir(parents=True, exist_ok=True)
     final = capd / f"{name}_final.mp4"
     if words:
+        # We wrote the narration, so use the exact words on whisper's timings --
+        # whisper mangles brand names ("DriftAI" -> "TI").
+        spoken = " ".join(s["narration"] for s in scenes)
+        words = align_script(spoken, words)
         ass = work / "cc.ass"
         ass.write_text(build_ass(words, style={"margin_v": args.margin_v}))
         esc = str(ass).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")

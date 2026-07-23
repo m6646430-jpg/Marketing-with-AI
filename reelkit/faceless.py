@@ -114,12 +114,17 @@ def concat_clips(clip_paths, out):
 
 
 def concat_audio(audio_paths, out):
-    """Concatenate per-scene audio into one narration track."""
+    """Concatenate per-scene audio into one narration track.
+
+    Re-encodes rather than stream-copies: the voice backend may return WAV
+    (Voicebox) or MP3 (edge-tts), and `-c copy` fails when the container and
+    codec don't line up. Re-encoding normalises whatever comes in.
+    """
     listfile = Path(out).parent / "_concat_a.txt"
     listfile.write_text("".join(f"file '{Path(a).resolve()}'\n" for a in audio_paths))
     subprocess.run([
         ffmpeg_path(), "-y", "-f", "concat", "-safe", "0", "-i", str(listfile),
-        "-c", "copy", str(out),
+        "-c:a", "libmp3lame", "-b:a", "192k", "-ar", "44100", str(out),
     ], capture_output=True, check=True)
     listfile.unlink(missing_ok=True)
     return out
