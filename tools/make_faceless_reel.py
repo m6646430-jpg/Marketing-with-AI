@@ -62,6 +62,8 @@ def main():
     grp.add_argument("--content", help="raw notes -> scene script (fresh each run)")
     grp.add_argument("--script-file", help="a saved scene-script JSON (reproducible)")
     ap.add_argument("--scenes", type=int, default=4)
+    ap.add_argument("--model", default=None,
+                    help="override the pillar's script model (e.g. anthropic/claude-sonnet-5)")
     ap.add_argument("--duration", type=int, default=30)
     ap.add_argument("--voice", default=VOICE, help="edge-tts voice (fallback)")
     ap.add_argument("--profile", default=None,
@@ -81,7 +83,8 @@ def main():
     else:
         print(f"writing {args.pillar} scene script (free)...", file=sys.stderr)
         data = write_scene_script(args.content, args.pillar,
-                                  duration=args.duration, n_scenes=args.scenes)
+                                  duration=args.duration, n_scenes=args.scenes,
+                                  model=args.model)
     scenes = data["scenes"]
     name = args.name or f"{args.pillar}_faceless"
 

@@ -91,7 +91,11 @@ STYLE_PHOTO_CHEAP = "google/gemini-2.5-flash-image"
 # The only layer where tokens are actually spent. See pillars.py for which
 # pillar gets which.
 
-SCRIPT_FREE = "nvidia/nemotron-3-super-120b-a12b:free"
+# Nemotron 3 ULTRA (550B) -- free, 1M context. Tested 2026-07-22 head-to-head
+# against Sonnet on the same brief: punchier hooks ("Stop using AI like
+# Google."), short caption-friendly sentences, clean CTA, and -- unlike the
+# 120B "Super" it replaces -- it does NOT fabricate "this week" news claims.
+SCRIPT_FREE = "nvidia/nemotron-3-ultra-550b-a55b:free"
 SCRIPT_PAID = "anthropic/claude-sonnet-5"
 
 SCORE_HIGHLIGHTS = SCRIPT_FREE
