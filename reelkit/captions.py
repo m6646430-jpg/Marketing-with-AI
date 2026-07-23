@@ -105,6 +105,35 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     return head + "\n".join(lines) + "\n"
 
 
+def align_script(script_text, whisper_words):
+    """Put the CORRECT script words on Whisper's timings.
+
+    Whisper reliably mis-hears brand names ("DriftAI" -> "of TI"), so captions
+    built straight from transcription contain errors. When you already know the
+    exact spoken text, keep Whisper's rhythm but substitute the real words:
+    map script word i onto the timing of whisper word round(i * N/M).
+
+    Returns the same [{start, end, word}] shape build_ass expects.
+    """
+    script = [w for w in script_text.split() if w.strip()]
+    if not whisper_words or not script:
+        return whisper_words
+    n_w, n_s = len(whisper_words), len(script)
+    out = []
+    for i, word in enumerate(script):
+        j = min(n_w - 1, round(i * n_w / n_s))
+        out.append({"start": whisper_words[j]["start"],
+                    "end": whisper_words[j]["end"],
+                    "word": word})
+    # keep timings monotonic so captions never jump backwards
+    for i in range(1, len(out)):
+        if out[i]["start"] < out[i - 1]["start"]:
+            out[i]["start"] = out[i - 1]["start"]
+        if out[i]["end"] <= out[i]["start"]:
+            out[i]["end"] = out[i]["start"] + 0.15
+    return out
+
+
 def build_srt(words, per_chunk=4):
     """Plain SRT -- no highlighting. For platforms that want a subtitle file
     rather than burned-in text (YouTube accepts these for accessibility)."""
